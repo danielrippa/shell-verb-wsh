@@ -1,0 +1,51 @@
+job: script: :livescript(bare=true)
+
+  new ActiveXObject 'Scripting.FileSystemObject'
+
+    basename = -> ..GetBaseName it
+
+  WScript
+
+    scriptname = basename ..ScriptName
+
+    fail = (errorlevel = 1) -> ..Quit errorlevel
+
+    ..StdErr
+
+      stderr = !-> for arg in & => ..Write arg
+
+    ..Arguments.Unnamed
+
+      argc = ..Count
+      arg = -> if argc > it then ..Item it else void
+
+  #
+
+  execute-verb = (filepath, params, verb, working-folder) !->
+
+    new ActiveXObject 'Shell.Application'
+
+      ..ShellExecute filepath, params, working-folder, verb, 0
+
+  #
+
+  if argc < 2
+
+    usage =
+
+      * "Usage:"
+        ""
+        "#scriptname verb filepath params working-folder"
+
+    for line in usage => stderr "#line\n"
+
+    fail 1
+
+  else
+
+    verb = arg 0
+    filepath = arg 1
+    params = arg 2
+    working-folder = arg 3
+
+    execute-verb filepath, params, verb, working-folder
